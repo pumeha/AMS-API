@@ -1,11 +1,12 @@
 const express = require("express");
 const users = require('./routes/users');
 const visitors = require('./routes/visitors');
+const survey = require('./routes/survey');
 
 const app = express();
 app.use(express.json());
 
-app.use('/ams/api',[users,visitors]);
+app.use('/ams/api',[users,visitors,survey]);
 
 const PORT = process.env.PORT || 8080;
 

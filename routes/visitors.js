@@ -1,4 +1,5 @@
 const { error, log } = require("console");
+const crypto = require('crypto');
 const express = require("express");
 const knex = require("knex");
 const db = knex(require("../knexfile").development); 
@@ -6,6 +7,7 @@ const router = express.Router();
 
 router.post('/visitors/add',async (req,res) => {
     const {fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,userid} = req.body;
+    const visitorid = generateVisitorId();
     if (userid.length !== 28) {
         return res.status(404).json({error : 'user does exist'});
     }
@@ -14,19 +16,19 @@ router.post('/visitors/add',async (req,res) => {
         return res.status(404).json({error: `Invalid input(s) for ${status}`});
     }
 
-    db('users').select('id').where({userid}).then((id)=>{
-        if (id === 0 ) {
-            return res.status(404).json({error : 'user does exist'});
-        }
-        db('visitors').insert({fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,userid})
+    const result = await checkUser(userid,res);
+    if (result === 0) {
+        return res.status(404).json({error: 'user does not exist'});
+    }
+    console.log(result);
+    db('visitors')
+        .insert({fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,userid,visitorid})
         .then((id)=>{
             return res.status(201).json({message: 'success',id:id});
         }).catch((error)=>{
             return res.status(500).json({error: error.message});
         });
 
-
-    });
     
 });
 router.get('/visitors',async (req,res) => {
@@ -73,7 +75,7 @@ router.get('/visitors',async (req,res) => {
        
         
       await  db('visitors').select('*')
-      .whereBetween('day',[fromday,today])
+        .whereBetween('day',[fromday,today])
         .andWhereBetween('month',[frommonth,tomonth])
         .andWhereBetween('year',[fromyear,toyear])
         .then(data=>{
@@ -107,8 +109,11 @@ router.get('/visitors/today/:userid',async (req,res) => {
         
     
 });
+router.get('/visitors/todaystatistics',async (req,res) => {
+    
+});
 
-    async function checkUser (userid,res) {
+async function checkUser (userid,res) {
         let status;
     if (typeof userid !== 'string' || !userid || userid.length != 28) {
         return res.status(404).json({error: 'user does not exist'});
@@ -126,7 +131,9 @@ router.get('/visitors/today/:userid',async (req,res) => {
         return;
 
     }).catch((error)=>{
-        return res.status(500).json({error: error.message});
+        status = 0;
+        return;
+        //return res.status(500).json({error: error.message});
     });
 
     return status;
@@ -182,6 +189,19 @@ function validateDate(fromday,frommonth,fromyear,today,tomonth,toyear) {
     }
 
     return errrors;
+}
+
+function generateVisitorId() {
+    const length = 28; // Firebase user ID is 28 characters long
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let userId = '';
+    const bytes = crypto.randomBytes(length);
+
+    for (let i = 0; i < length; i++) {
+        userId += characters[bytes[i] % characters.length];
+    }
+
+    return userId;
 }
 
 module.exports = router;

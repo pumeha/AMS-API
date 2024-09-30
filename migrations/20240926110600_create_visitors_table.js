@@ -8,17 +8,13 @@ const time = hours + ':'+ currentDate.getMinutes() + ' ' + AmPm;
   return knex.schema.createTable('visitors',function(table){
         table.increments('id').primary();
         table.string('userid').notNullable();
+        table.string('visitorid').notNullable().unique();
         table.string('fullname').notNullable();
         table.string('address').notNullable();
         table.string('phonenumber').notNullable();
         table.string('purpose').notNullable();
         table.string('whotosee').notNullable();
-        table.string('1flooruserid',1).defaultTo('0'); //0 = not seen, 1= present, 2 = left 
-        table.string('2flooruserid',1).defaultTo('0');
-        table.string('3flooruserid',1).defaultTo('0');
-        table.string('4flooruserid',1).defaultTo('0');
-        table.string('5flooruserid',1).defaultTo('0');
-        table.string('floor1',1).defaultTo('0'); 
+        table.string('floor1',1).defaultTo('0'); //0 = not seen, 1= present, 2 = left
         table.string('floor2',1).defaultTo('0');
         table.string('floor3',1).defaultTo('0');
         table.string('floor4',1).defaultTo('0');
