@@ -35,6 +35,9 @@ router.post('/users/login',async (req,res) => {
             }
             return res.status(201).json(data);
         }).catch((error)=>{
+           if (error.message == "Cannot read properties of undefined (reading 'length')") {
+            return  res.status(404).json({error: 'user does not exist'});
+           }
             return res.status(500).json({error: error.message});
         });
 

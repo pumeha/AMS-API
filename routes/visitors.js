@@ -7,11 +7,13 @@ const router = express.Router();
 
 router.post('/visitors/add',async (req,res) => {
     const {fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,userid} = req.body;
+    console.log(fullname);
+    
     const visitorid = generateVisitorId();
-    if (userid.length !== 28) {
+    if (!userid || userid.length !== 28) {
         return res.status(404).json({error : 'user does exist'});
     }
-    const status = validateInputs(fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno);
+    const status = await validateInputs(fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno);
     if (status.length > 0) {
         return res.status(404).json({error: `Invalid input(s) for ${status}`});
     }
