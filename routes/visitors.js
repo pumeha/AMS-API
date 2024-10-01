@@ -22,9 +22,14 @@ router.post('/visitors/add',async (req,res) => {
     if (result === 0) {
         return res.status(404).json({error: 'user does not exist'});
     }
-    console.log(result);
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    
     db('visitors')
-        .insert({fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,userid,visitorid})
+        .insert({fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,
+            userid,visitorid,year,month,day})
         .then((id)=>{
             return res.status(201).json({message: 'success',id:id});
         }).catch((error)=>{
@@ -96,6 +101,7 @@ router.get('/visitors/today/:userid',async (req,res) => {
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
     const day = today.getDate();
+    
     const userid = req.params.userid;
     
         const result =  await checkUser(userid,res);
@@ -106,6 +112,8 @@ router.get('/visitors/today/:userid',async (req,res) => {
             if (data.length === 0) {
                 return res.status(200).json({message: 'no record found'});
             }
+        // console.log(data);
+         
             return res.status(200).json({message: data});
         })
         
