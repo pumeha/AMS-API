@@ -108,7 +108,7 @@ router.get('/visitors/today/:userid',async (req,res) => {
         if (result === 0) {
             return res.status(404).json({error : 'user does not exist'});
         }
-        db('visitors').select('*').where({day,month,year}).then(data=>{
+        db('visitors').select('*').where({day,month,year}).orderBy('id','desc').then(data=>{
             if (data.length === 0) {
                 return res.status(200).json({message: 'no record found'});
             }
