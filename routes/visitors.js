@@ -2,7 +2,7 @@ const { error, log } = require("console");
 const crypto = require('crypto');
 const express = require("express");
 const knex = require("knex");
-const db = knex(require("../knexfile").development); 
+const db = knex(require("../config/knexfile").development); 
 const router = express.Router();
 
 router.post('/visitors/add',async (req,res) => {
@@ -26,10 +26,17 @@ router.post('/visitors/add',async (req,res) => {
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
     const day = today.getDate();
+    const  currentDate = new Date();
+let hours = currentDate.getHours();
+const AmPm = hours >= 12 ? 'PM' : 'AM';
+//convert hours to 12-hour format
+hours = hours % 12 || 12;
+const time = hours + ':'+ String(currentDate.getMinutes()).padStart(2, '0') + ' ' + AmPm;
+
     
     db('visitors')
         .insert({fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,
-            userid,visitorid,year,month,day})
+            userid,visitorid,year,month,day,time_in:time})
         .then((id)=>{
             return res.status(201).json({message: 'success',id:id});
         }).catch((error)=>{
@@ -114,13 +121,82 @@ router.get('/visitors/today/:userid',async (req,res) => {
             }
         // console.log(data);
          
-            return res.status(200).json({message: data});
+        return res.status(200).json({message: data});
         })
         
     
 });
-router.get('/visitors/todaystatistics',async (req,res) => {
+router.post('/visitors/todaystatistics/',async (req,res) => {
+   const {userid} = req.body;
+        const result =  await checkUser(userid,res);
+        if (result === 0) {
+            return res.status(404).json({error : 'user does not exist'});
+        }
     
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+
+Promise.all([
+  // Query for counting status
+  db('visitors')
+    .select('status')
+    .count('status as count')
+    .where({ day, month, year })
+    .groupBy('status'),
+  
+  // Query for counting purpose
+  db('visitors')
+    .select('purpose')
+    .count('purpose as count')
+    .where({ day, month, year })
+    .groupBy('purpose'),
+
+    //Query for counting floor
+
+  db('visitors')
+   .select('floorofinterest','status')
+   .count('status as count')
+   .where({day,month,year})
+    .groupBy('floorofinterest','status')
+
+])
+.then(([statusResults, purposeResults,floorResults]) => {
+  res.status(200).json({ statusResults, purposeResults,floorResults });
+})
+.catch((err) => {
+  console.log(err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+
+
+    
+});
+
+router.post('/visitors/signoutn',async (req,res) => {
+    const {userid,visitorid} = req.body;
+    if (userid == null || visitorid == null) {
+        return res.status(404).json({error: 'invalid inputs'});
+    }
+   const status =  checkUser(userid,res);
+    if (status == 0) {
+        return res.status(404).json({error: 'user does not exist'});
+    }
+
+    if (typeof visitorid !== 'string' || visitorid.length != 28) {
+        return res.status(404).json({error: 'Visitor does not exist'});
+    }
+
+    db('visitors').where({visitorid}).update({status: 0,time_out: currentTime()}).then(()=>{
+            return res.status(200).json({message: 'Sign out'});
+    }).catch(error=>{
+            return res.status(500).json({error:error.message});
+    });
+
+
+
 });
 
 async function checkUser (userid,res) {
@@ -212,6 +288,16 @@ function generateVisitorId() {
     }
 
     return userId;
+}
+
+function currentTime() {
+    const  currentDate = new Date();
+let hours = currentDate.getHours();
+const AmPm = hours >= 12 ? 'PM' : 'AM';
+//convert hours to 12-hour format
+hours = hours % 12 || 12;
+const time = hours + ':'+ String(currentDate.getMinutes()).padStart(2, '0') + ' ' + AmPm;
+return time;
 }
 
 module.exports = router;

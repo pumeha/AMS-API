@@ -1,9 +1,8 @@
-const { error } = require("console");
 const express = require("express");
-const knex = require("knex");
+const {knexDb}  = require('../config/database');
 const router = express.Router();
-const db = knex(require("../knexfile").development);
 
+//i need to check whether the userid is a receptionist
 router.post('/survey',async (req,res) => {
     let { visitorid,satisfied,how_satisfied,reasons} = req.body;
     const _data = checkinputs(satisfied,how_satisfied,reasons);
@@ -21,21 +20,21 @@ router.post('/survey',async (req,res) => {
     if (result === 0) {
         return res.status(404).json({error: 'user does not exist'});
     }
-    db('survey').insert({visitorid,satisfied,how_satisfied,reasons}).then(id =>{
+    knexDb('survey').insert({visitorid,satisfied,how_satisfied,reasons}).then(id =>{
         if (id.length === 0 ) {
             return res.status(404).json({error: 'an error occur will inserting'});
         }
         return res.status(201).json({message: 'success'});
     });
 });
-
+//checking if user exist
 async function checkvisitor(visitorid,res) {
     let result;
     if(typeof visitorid !== 'string' || visitorid.length !== 28){
         return res.status(404).json({error: 'visitor does not exist'});
     }
 
-   await db('visitors').select('id').where({visitorid}).first().then((id)=>{
+   await knexDb('visitors').select('id').where({visitorid}).first().then((id)=>{
     
 
         if (id.length === 0) {
@@ -44,12 +43,13 @@ async function checkvisitor(visitorid,res) {
         }
         result = 1;
       return;
-    }).catch((error)=>{
+    }).catch(()=>{
         result = 0; 
         return;
     });
    return result;
 }
+//validate inputs...
 function checkinputs(satisfied,how_satisfied,reasons) {
    const errrors = [];
    

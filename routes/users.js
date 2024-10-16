@@ -1,8 +1,7 @@
 const { error } = require("console");
 const express = require("express");
-const knex = require("knex");
 const router = express.Router();
-const db = knex(require('../knexfile').development);
+const {knexDb} = require('../config/database');
 const crypto = require('crypto');
 
 router.post('/users/add',async (req,res) => {
@@ -13,7 +12,7 @@ router.post('/users/add',async (req,res) => {
         return res.status(404).json({error: `invalid input(s) for ${inputs}`});
     }
     const userId = generateUserId();
-    db('users')
+    knexDb('users')
     .insert({userId,firstname,lastname,phonenumber,passcode,role})
     .then((id)=>{
         return res.status(201).json({message: 'Success',userId: userId,id:id});
@@ -29,7 +28,7 @@ router.post('/users/login',async (req,res) => {
     if (inputs.length > 0) {
         return res.status(404).json({error: `invalid input(s) for ${inputs}`});
     }
-        db('users').select('userid','role').where({phonenumber,passcode}).first().then((data)=>{
+        knexDb('users').select('userid','role').where({phonenumber,passcode}).first().then((data)=>{
             if (data.length === 0) {
              return  res.status(404).json({error: 'invalid user'});
             }
