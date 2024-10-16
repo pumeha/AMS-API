@@ -1,8 +1,6 @@
-const { error, log } = require("console");
 const crypto = require('crypto');
 const express = require("express");
-const knex = require("knex");
-const db = knex(require("../config/knexfile").development); 
+const {knexDb} = require('../config/database');
 const router = express.Router();
 
 router.post('/visitors/add',async (req,res) => {
@@ -34,7 +32,7 @@ hours = hours % 12 || 12;
 const time = hours + ':'+ String(currentDate.getMinutes()).padStart(2, '0') + ' ' + AmPm;
 
     
-    db('visitors')
+    knexDb('visitors')
         .insert({fullname,address,phonenumber,purpose,whotosee,floorofinterest,tagno,
             userid,visitorid,year,month,day,time_in:time})
         .then((id)=>{
@@ -69,7 +67,7 @@ router.get('/visitors',async (req,res) => {
         fromyear = fromyear.toString(); toyear = toyear.toString();
         console.log(frommonth);
         
-      await  db('visitors').select('*')
+      await  knexDb('visitors').select('*')
         .whereBetween('month',[frommonth,tomonth])
         .andWhereBetween('year',[fromyear,toyear])
         .then(data=>{
@@ -88,7 +86,7 @@ router.get('/visitors',async (req,res) => {
         fromyear = fromyear.toString(); toyear = toyear.toString();
        
         
-      await  db('visitors').select('*')
+      await  knexDb('visitors').select('*')
         .whereBetween('day',[fromday,today])
         .andWhereBetween('month',[frommonth,tomonth])
         .andWhereBetween('year',[fromyear,toyear])
@@ -115,7 +113,7 @@ router.get('/visitors/today/:userid',async (req,res) => {
         if (result === 0) {
             return res.status(404).json({error : 'user does not exist'});
         }
-        db('visitors').select('*').where({day,month,year}).orderBy('id','desc').then(data=>{
+        knexDb('visitors').select('*').where({day,month,year}).orderBy('id','desc').then(data=>{
             if (data.length === 0) {
                 return res.status(200).json({message: 'no record found'});
             }
@@ -140,14 +138,14 @@ router.post('/visitors/todaystatistics/',async (req,res) => {
 
 Promise.all([
   // Query for counting status
-  db('visitors')
+  knexDb('visitors')
     .select('status')
     .count('status as count')
     .where({ day, month, year })
     .groupBy('status'),
   
   // Query for counting purpose
-  db('visitors')
+  knexDb('visitors')
     .select('purpose')
     .count('purpose as count')
     .where({ day, month, year })
@@ -155,7 +153,7 @@ Promise.all([
 
     //Query for counting floor
 
-  db('visitors')
+  knexDb('visitors')
    .select('floorofinterest','status')
    .count('status as count')
    .where({day,month,year})
@@ -189,7 +187,7 @@ router.post('/visitors/signoutn',async (req,res) => {
         return res.status(404).json({error: 'Visitor does not exist'});
     }
 
-    db('visitors').where({visitorid}).update({status: 0,time_out: currentTime()}).then(()=>{
+    knexDb('visitors').where({visitorid}).update({status: 0,time_out: currentTime()}).then(()=>{
             return res.status(200).json({message: 'Sign out'});
     }).catch(error=>{
             return res.status(500).json({error:error.message});
@@ -205,7 +203,7 @@ async function checkUser (userid,res) {
         return res.status(404).json({error: 'user does not exist'});
     }
 
-   await db('users').select('id').where({userid}).first().then(id=>{
+   await knexDb('users').select('id').where({userid}).first().then(id=>{
       
         
         if (id.length ===  0) {
