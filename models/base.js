@@ -10,8 +10,7 @@ class BaseModel{
 
     create(props){
         delete props.id;
-        return this.knexInstance.insert(props).
-        returning('*').timeout(this.timeout);
+        return this.knexInstance.insert(props).timeout(this.timeout);
     }
 
     findAll(){
@@ -35,7 +34,7 @@ class BaseModel{
     update(id,props){
         delete props.id; //not allowed to set 'id'
         return this.knexInstance.update(props).from(this.tableName)
-        .where({id}).returning(this.selectableProps).timeout(this.timeout);
+        .where({id}).timeout(this.timeout);
     }
 
 
