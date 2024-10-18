@@ -58,6 +58,7 @@ class VisitorController extends BaseController {
      if(!data) return this.errorResponse(404,'an error occured while fetching');
        
         return this.successResponse('success',data,200);
+        
      }).catch(err=>{
         console.log(err);
         return this.errorResponse(500,'Internal Server Error');
@@ -65,7 +66,21 @@ class VisitorController extends BaseController {
     }
 
     async getTodayVisitors(){
-     
+     const {userid} = this.req.params;
+     const status = await this.validateReceptionist(userid);
+
+     if(status == 0 ) return this.errorResponse(404,'receptionist does not exist');
+   
+     return new Visitor()
+     .find({day: this.todayDay(),month: this.todayMonth(),year:this.todayYear()})
+     .then(data=>{
+        if(!data) return this.errorResponse(404,'an error occurred while fetching');
+        return this.successResponse('success',data,200);
+     }).catch(err=>{
+      console.log(err);
+        return this.errorResponse(500,'Internal Server Error');
+     });
+    
         
     }
 

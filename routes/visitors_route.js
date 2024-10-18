@@ -21,15 +21,11 @@ router.post('/visitors/todaystatistics/',async (req,res) => {
 router.post('/visitors/signoutn',async (req,res) => {
     const controller = new VisitorController(req,res);
     await controller.signOutNonOfficialVisitor();
+});
 
-//     knexDb('visitors').where({visitorid}).update({status: 0,time_out: currentTime()}).then(()=>{
-//             return res.status(200).json({message: 'Sign out'});
-//     }).catch(error=>{
-//             return res.status(500).json({error:error.message});
-//     });
-
-
-
+router.get('/visitors/today/:userid',async (req,res) => {
+  const controller = new VisitorController(req,res);
+  await controller.getTodayVisitors();
 });
 
 module.exports = router;
