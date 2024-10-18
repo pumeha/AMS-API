@@ -88,54 +88,11 @@ router.post('/visitors/add',async (req,res) => {
         
     
 // });
-// router.post('/visitors/todaystatistics/',async (req,res) => {
-//    const {userid} = req.body;
-//         const result =  await checkUser(userid,res);
-//         if (result === 0) {
-//             return res.status(404).json({error : 'user does not exist'});
-//         }
-    
-//         const today = new Date();
-//         const year = today.getFullYear();
-//         const month = today.getMonth() + 1;
-//         const day = today.getDate();
+router.post('/visitors/todaystatistics/',async (req,res) => {
+  const controller = new VisitorController(req,res);
+  await controller.getTodayStatistics();
 
-// Promise.all([
-//   // Query for counting status
-//   knexDb('visitors')
-//     .select('status')
-//     .count('status as count')
-//     .where({ day, month, year })
-//     .groupBy('status'),
-  
-//   // Query for counting purpose
-//   knexDb('visitors')
-//     .select('purpose')
-//     .count('purpose as count')
-//     .where({ day, month, year })
-//     .groupBy('purpose'),
-
-//     //Query for counting floor
-
-//   knexDb('visitors')
-//    .select('floorofinterest','status')
-//    .count('status as count')
-//    .where({day,month,year})
-//     .groupBy('floorofinterest','status')
-
-// ])
-// .then(([statusResults, purposeResults,floorResults]) => {
-//   res.status(200).json({ statusResults, purposeResults,floorResults });
-// })
-// .catch((err) => {
-//   console.log(err);
-//   res.status(500).json({ error: 'Internal Server Error' });
-// });
-
-
-
-    
-// });
+ });
 
 // router.post('/visitors/signoutn',async (req,res) => {
 //     const {userid,visitorid} = req.body;

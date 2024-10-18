@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 class BaseController {
-    
+    currentDate = new Date();
     constructor(req,res) {
         this.req = req;
         this.res = res;
@@ -29,13 +29,22 @@ class BaseController {
     } 
 
     currentTime() {
-        const  currentDate = new Date();
-    let hours = currentDate.getHours();
+    let hours = this.currentDate.getHours();
     const AmPm = hours >= 12 ? 'PM' : 'AM';
     //convert hours to 12-hour format
     hours = hours % 12 || 12;
-    const time = hours + ':'+ String(currentDate.getMinutes()).padStart(2, '0') + ' ' + AmPm;
+    const time = hours + ':'+ String(this.currentDate.getMinutes()).padStart(2, '0') + ' ' + AmPm;
     return time;
+    }
+
+    todayYear(){
+        return this.currentDate.getFullYear();
+    }
+    todayMonth(){
+        return this.currentDate.getMonth() + 1;
+    }
+    todayDay(){
+        return this.currentDate.getDate();
     }
 }
 

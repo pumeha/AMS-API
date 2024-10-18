@@ -12,6 +12,28 @@ class VisitorModel extends BaseModel {
       ]);  
     }
 
+    countStatus(props){
+      this.knexInstance.select('status')
+      .count('status as count')
+      .where(props)
+      .groupBy('status');
+    }
+
+    countPurpose(props){
+      this.knexInstance.select('purpose')
+      .count('purpose as count')
+      .where(props)
+      .groupBy('propose');
+    }
+
+    countFloor(props){
+      this.knexInstance.select('floorofinterest','status')
+      .count('status as count')
+      .where(props)
+      .groupBy('floorofinterest','status');
+    }
+
+
   
 }
 module.exports = VisitorModel;

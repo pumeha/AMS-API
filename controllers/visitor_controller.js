@@ -20,15 +20,14 @@ class VisitorController extends BaseController {
         const receptionist = await this.validateReceptionist(props.userid);
         
         if(receptionist == 0) return this.errorResponse(404,'Receptionist does not exist');
-            console.log(receptionist);
             
         const visitorid = this.generateUserId();
         props.visitorid = visitorid;
         props.time_in = this.currentTime();
-        const today = new Date();
-    props.year = today.getFullYear();
-    props.month = today.getMonth() + 1;
-    props.day = today.getDate();
+        
+        props.year = this.todayYear();
+        props.month = this.todayMonth();
+        props.day = this.todayDay();
 
         return new Visitor().create(props).then(data=>{
             if(!data) return this.errorResponse(404,'failed to register visitor');
@@ -45,11 +44,31 @@ class VisitorController extends BaseController {
     }
 
     async getTodayVisitors(){
-
+     
+        
     }
 
     async getTodayStatistics(){
+        const props = {};
+        const {userid} = this.req.body;
+        const result = this.validateReceptionist(userid);
 
+        if(result == 0) return this.errorResponse(404,'receptionist does not exist');
+        props.year = this.todayYear();
+        props.month = this.todayMonth();
+        props.day = this.todayDay();
+
+        Promise.all([
+            new Visitor().countStatus(props),
+            new Visitor().countPurpose(props),
+            new Visitor().countFloor(props)
+        ]).then(([statusResults,purposeResults,floorResults])=>{
+            return this.successResponse('success',{statusResults,purposeResults,floorResults},200);
+        }).catch((err)=>{
+            console.log(err);
+            return this.errorResponse(500,'Internal Server Error');
+        });
+        
     }
 
     async signOutVisitor(){
@@ -64,7 +83,6 @@ class VisitorController extends BaseController {
             return 0;
         }
         return new User().findOne({userid}).then(data =>{
-            
             if(!data) return 0;
             return 1;
         }).catch(()=>{
