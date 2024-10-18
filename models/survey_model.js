@@ -1,4 +1,4 @@
-const BaseModel = require("./base");
+const BaseModel = require("./base_model");
 
 class SurveyModel extends BaseModel {
     constructor() {

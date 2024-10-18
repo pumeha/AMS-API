@@ -1,7 +1,7 @@
 const express = require("express");
-const users = require('./routes/users');
-const visitors = require('./routes/visitors');
-const survey = require('./routes/survey');
+const users = require('./routes/users_route');
+const visitors = require('./routes/visitors_route');
+const survey = require('./routes/survey_route');
 
 const app = express();
 app.use(express.json());

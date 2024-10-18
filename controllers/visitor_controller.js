@@ -1,6 +1,6 @@
 const BaseController = require("./base_controller");
-const User = require('../models/user');
-const Visitor = require('../models/visitors');
+const User = require('../models/user_model');
+const Visitor = require('../models/visitors_model');
 
 class VisitorController extends BaseController {
     constructor(req,res) {
@@ -32,8 +32,9 @@ class VisitorController extends BaseController {
         return new Visitor().create(props).then(data=>{
             if(!data) return this.errorResponse(404,'failed to register visitor');
             return this.successResponse('success',data,201);
-        }).catch(()=>{
-            return this.errorResponse(500,'an error occured while registering');
+        }).catch((err)=>{
+            console.log(err);
+            return this.errorResponse(500,'Internal Server Error');
         });
 
     
@@ -41,6 +42,26 @@ class VisitorController extends BaseController {
 
     async getVisitors(){
 
+    const props = this.req.body;
+
+     const date = this.validateDate(props.fromday,props.frommonth,props.fromyear,
+        props.today,props.tomonth,props.toyear
+     );   
+
+     if(date.length > 0) return this.errorResponse(404,`invalid input(s) for ${date}`);
+
+     const receptionist = await this.validateReceptionist(props.userid);
+     
+     if(receptionist == 0) return this.errorResponse(404,'receptionist does not exist');
+
+      return new Visitor().getVisitorsFromAndTo(props).then(data=>{
+     if(!data) return this.errorResponse(404,'an error occured while fetching');
+       
+        return this.successResponse('success',data,200);
+     }).catch(err=>{
+        console.log(err);
+        return this.errorResponse(500,'Internal Server Error');
+     });
     }
 
     async getTodayVisitors(){
@@ -51,7 +72,7 @@ class VisitorController extends BaseController {
     async getTodayStatistics(){
         const props = {};
         const {userid} = this.req.body;
-        const result = this.validateReceptionist(userid);
+        const result = await this.validateReceptionist(userid);
 
         if(result == 0) return this.errorResponse(404,'receptionist does not exist');
         props.year = this.todayYear();
@@ -71,18 +92,33 @@ class VisitorController extends BaseController {
         
     }
 
-    async signOutVisitor(){
-      
+    async signOutNonOfficialVisitor(){
+        const props = this.req.body;
+        const inputs = this.validateNonSignOut(props.visitorid,props.userid);
+        if(inputs.length > 0) return this.errorResponse(404,`invalid inputs for ${inputs}`);
+
+        const time = this.currentTime();
         
-        
-        
+        const result = await this.validateReceptionist(props.userid);
+        if(result == 0) return this.errorResponse(404,'receptionist does not exist');
+
+        return new Visitor().update({visitorid:props.visitorid},
+            {status:0,time_out:time}).then(data =>{
+                if(!data) return this.errorResponse(404,'an error occurred while updating');
+               return this.successResponse('success',data,200);
+                
+        }).catch(err =>{
+            console.log(err);
+            return this.errorResponse(500,'Internal Server Error');
+        });
+
     }
 
     async validateReceptionist(userid){        
         if (typeof userid !== 'string' || !userid || userid.length != 28) {
             return 0;
         }
-        return new User().findOne({userid}).then(data =>{
+      return new User().findOne({userid}).then(data =>{
             if(!data) return 0;
             return 1;
         }).catch(()=>{
@@ -140,6 +176,17 @@ class VisitorController extends BaseController {
         }
     
         return errrors;
+    }
+
+    validateNonSignOut(visitorid,userid){
+
+        const error = [];
+        if (!visitorid || typeof visitorid !== 'string' || visitorid.length !== 28 ) {
+            error.push('visitor');
+        }
+        if(!userid || typeof userid !== 'string' || userid.length !== 28) {error.push('receptionist');}
+
+        return error;
     }
 }
 

@@ -1,6 +1,6 @@
 const BaseController = require("./base_controller");
 const crypto = require('crypto');
-const User = require('../models/user');
+const User = require('../models/user_model');
 
 class UserController extends BaseController {
     constructor(req,res) {

@@ -31,10 +31,10 @@ class BaseModel{
 
     }
 
-    update(id,props){
+    update(whereClause,props){
         delete props.id; //not allowed to set 'id'
         return this.knexInstance.update(props).from(this.tableName)
-        .where({id}).timeout(this.timeout);
+        .where(whereClause).timeout(this.timeout);
     }
 
 
