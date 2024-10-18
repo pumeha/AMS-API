@@ -27,6 +27,16 @@ class BaseController {
         }
         return userId;
     } 
+
+    currentTime() {
+        const  currentDate = new Date();
+    let hours = currentDate.getHours();
+    const AmPm = hours >= 12 ? 'PM' : 'AM';
+    //convert hours to 12-hour format
+    hours = hours % 12 || 12;
+    const time = hours + ':'+ String(currentDate.getMinutes()).padStart(2, '0') + ' ' + AmPm;
+    return time;
+    }
 }
 
 module.exports = BaseController;

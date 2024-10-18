@@ -8,3 +8,5 @@ class SurveyModel extends BaseModel {
        ]); 
     }
 }
+
+module.exports  = SurveyModel;

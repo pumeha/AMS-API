@@ -11,4 +11,7 @@ class VisitorModel extends BaseModel {
         'time_out','status'
       ]);  
     }
+
+  
 }
+module.exports = VisitorModel;
