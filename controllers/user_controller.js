@@ -41,7 +41,7 @@ class UserController extends BaseController {
         }
         return new User().findOne(props).then(data=>{
             if(!data) return this.errorResponse(404,'user does not exist');
-            return this.successResponse('success',data['userid'],200);
+            return this.successResponse('success',{userid: data['userid'],role: data['role']},200);
         }).catch(()=>{
           return this.errorResponse(500, 'an error occurred while logging in');      
         });

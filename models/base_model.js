@@ -20,7 +20,8 @@ class BaseModel{
 
     find(filters){
         return this.knexInstance.select(this.props)
-        .from(this.tableName).where(filters).timeout(this.timeout);
+        .from(this.tableName).where(filters).orderBy('id','desc').timeout(this.timeout);
+        //I am sorting the data in desc order
     }
     
     findOne(filters){
