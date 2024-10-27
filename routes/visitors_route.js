@@ -5,10 +5,9 @@ const VisitorController = require('../controllers/visitor_controller');
 router.post('/visitors/add',async (req,res) => {
   const controller = new VisitorController(req,res);
   await controller.registerVisitor();  
-    
 });
 
- router.get('/visitors',async (req,res) => {
+ router.post('/visitors',async (req,res) => {
   const controller = new VisitorController(req,res);
   await controller.getVisitors();
  });

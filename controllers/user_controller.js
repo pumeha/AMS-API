@@ -39,9 +39,13 @@ class UserController extends BaseController {
         if (inputs.length > 0) {
         return this.errorResponse(404,`invalid input(s) for ${inputs}`);    
         }
-        return new User().findOne(props).then(data=>{
+        return new User().findOne({"phonenumber":props.phonenumber}).then(data=>{
             if(!data) return this.errorResponse(404,'user does not exist');
+           if (data['passcode'] == props.passcode) {
             return this.successResponse('success',{userid: data['userid'],role: data['role']},200);
+           }else{
+            return this.errorResponse(404,'invalid phonenumber or passcode');
+           }
         }).catch(()=>{
           return this.errorResponse(500, 'an error occurred while logging in');      
         });
