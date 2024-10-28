@@ -65,6 +65,16 @@ class VisitorController extends BaseController {
      });
     }
 
+    async searchVisitor(){
+    //TODO
+    const props = this.req.params;
+    //status if = 0, search with phone, = 1 with name , 2 search with both name and phone
+    delete props.userid;
+    console.log(props);
+    this.res.send(props);
+    
+    }
+
     async getTodayVisitors(){
      const {userid} = this.req.params;
      const status = await this.validateReceptionist(userid);
@@ -105,6 +115,10 @@ class VisitorController extends BaseController {
             return this.errorResponse(500,'Internal Server Error');
         });
         
+    }
+
+    async getRangeStatistics(){
+        //TODO
     }
 
     async signOutNonOfficialVisitor(){

@@ -13,4 +13,9 @@ router.post('/users/login',async (req,res) => {
     await controller.login();
 });
 
+router.get('/users',async (req,res) => {
+    const controller = new UserController(req,res);
+    await controller.getUsers();
+});
+
 module.exports = router;
