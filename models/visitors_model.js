@@ -39,6 +39,15 @@ class VisitorModel extends BaseModel {
       .andWhereBetween('year',[props.fromyear,props.toyear]).timeout(this.timeout);
     }
 
+    findByFullnameContains(substring) {      
+      return this.knexInstance
+          .select('*')
+          .from(this.tableName)
+          .where('fullname', 'like', `%${substring}%`) // Partial match on fullname
+          .orderBy('id', 'desc')
+          .timeout(this.timeout);
+  }
+
     
 
 

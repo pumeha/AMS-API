@@ -66,12 +66,44 @@ class VisitorController extends BaseController {
     }
 
     async searchVisitor(){
-    //TODO
     const props = this.req.params;
-    //status if = 0, search with phone, = 1 with name , 2 search with both name and phone
-    delete props.userid;
-    console.log(props);
-    this.res.send(props);
+    //status if = 0, search with phone, = 1 with name 
+
+    const resultFromValidator = this.validateSearchInputs(props.status,props.name,props.phonenumber);
+    if (resultFromValidator.length > 0) {
+        return this.errorResponse(404,`invalid input(s) for ${resultFromValidator}`);
+    }
+
+    const validateUser = await this.validateReceptionist(props.userid);
+    if (validateUser == 0 || validateUser == 1) {
+        return this.errorResponse(404,'Access denied');
+    }
+   
+        switch (props.status) {
+            case '0':
+                new Visitor().find({"phonenumber":props.phonenumber}).then(data=>{
+                    return this.successResponse('success',data,200); 
+                }).catch(err=>{
+                    console.log(err);
+                    return this.errorResponse(500,'Internal Server Error');
+                });
+
+                break;
+
+            case '1':
+                new Visitor().findByFullnameContains(props.name).then(data=>{
+                    return this.successResponse('success',data,200); 
+                }).catch(err=>{
+                    console.log(err);
+                    return this.errorResponse(500,'Internal Server Error');
+                });
+
+                break;
+        
+            default:
+                this.errorResponse(404,'Accessed Denied');
+                break;
+        }
     
     }
 
@@ -149,10 +181,35 @@ class VisitorController extends BaseController {
         }
       return new User().findOne({userid}).then(data =>{
             if(!data) return 0;
+            const role = data['role'];
+            if (role == 'admin') {
+                return 2;
+            }
             return 1;
         }).catch(()=>{
             return 0;
         });
+    }
+
+   validateSearchInputs(status,name,phonenumber){
+      const errors = [];
+
+      if (status == '' || status !== '0' &&
+        status !== '1' &&  status !== '2') {
+            errors.push('status');
+        }
+
+        if (typeof name !== 'string' || name == '' || name.length < 3) {
+            errors.push('name');
+        }
+
+        if (typeof phonenumber !== 'string' || phonenumber.length !== 11) {
+
+            errors.push('phonenumber');
+        }
+
+        return errors;
+
     }
 
     validateVisitors(fullname,address,phonenumber,purpose,whotosee,floor,tagno) {

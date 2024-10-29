@@ -26,7 +26,7 @@ class UserController extends BaseController {
                 if (error.code == 'ER_DUP_ENTRY') {
                    return this.errorResponse(500,'phone number already exists');
                 }
-             return this.errorResponse(500,'An error occurred while creating the user');   
+             return this.errorResponse(500,'Internal Server Error');   
 
 
             });
@@ -47,8 +47,12 @@ class UserController extends BaseController {
             return this.errorResponse(404,'invalid phonenumber or passcode');
            }
         }).catch(()=>{
-          return this.errorResponse(500, 'an error occurred while logging in');      
+          return this.errorResponse(500, 'Internal Server Error');      
         });
+    }
+
+    async getUsers(){
+        
     }
                 
     validateLoginInputs(phonenumber,passcode) {
