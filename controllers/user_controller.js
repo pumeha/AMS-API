@@ -1,5 +1,6 @@
 const BaseController = require("./base_controller");
 const User = require('../models/user_model');
+const VisitorController = require("./visitor_controller");
 
 class UserController extends BaseController {
     constructor(req,res) {
@@ -52,7 +53,18 @@ class UserController extends BaseController {
     }
 
     async getUsers(){
-        
+        const userid = this.req.params;
+        const validateUser = await new VisitorController().validateReceptionist(userid['userid']);  
+          
+        if (validateUser !== 2) {
+            return this.errorResponse(404,'Access Denied');
+        }
+        new User().findAll().then(data=>{
+        return this.successResponse('Success',data,200);
+        }).catch(err=>{
+            console.log(err);
+            return this.errorResponse(500,'Internal Server Error');
+        })
     }
                 
     validateLoginInputs(phonenumber,passcode) {

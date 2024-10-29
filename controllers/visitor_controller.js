@@ -1,6 +1,8 @@
 const BaseController = require("./base_controller");
 const User = require('../models/user_model');
 const Visitor = require('../models/visitors_model');
+const Survey = require("../models/survey_model");
+
 
 class VisitorController extends BaseController {
     constructor(req,res) {
@@ -50,9 +52,10 @@ class VisitorController extends BaseController {
 
      if(date.length > 0) return this.errorResponse(404,`invalid input(s) for ${date}`);
 
-     const receptionist = await this.validateReceptionist(props.userid);
-     
-     if(receptionist == 0) return this.errorResponse(404,'receptionist does not exist');
+     const validateUser = await this.validateReceptionist(props.userid);
+    if (validateUser == 0 || validateUser == 1) {
+        return this.errorResponse(404,'Access denied');
+    }
 
       return new Visitor().getVisitorsFromAndTo(props).then(data=>{
      if(!data) return this.errorResponse(404,'an error occured while fetching');
@@ -150,7 +153,34 @@ class VisitorController extends BaseController {
     }
 
     async getRangeStatistics(){
-        //TODO
+        const props = this.req.body;
+
+        const date = this.validateDate(props.fromday,props.frommonth,props.fromyear,
+           props.today,props.tomonth,props.toyear
+        );   
+
+        if (date.length >0) {
+            return this.errorResponse(404,`invalid input(s) for ${date}`);
+        }
+        const validateUser = await this.validateReceptionist(props.userid);
+
+        if (validateUser == 0 || validateUser == 1) {
+            return this.errorResponse(404,'Access Denied');
+        }
+
+        Promise.all([
+            new Visitor().countFloorFromandTo(props),
+            new Visitor().countPurposeFromandTo(props),
+            new Visitor().countStatusFromandTo(props)
+        ]).then(([purposeResults,floorResults,statusResults])=>{
+            return this.successResponse('sucess',{
+                purposeResults,floorResults,statusResults
+            },200);
+        }).catch(err=>{
+            console.log(err);
+            return this.errorResponse(500,'Internal Server Error');
+        });
+
     }
 
     async signOutNonOfficialVisitor(){

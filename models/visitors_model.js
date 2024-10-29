@@ -19,6 +19,15 @@ class VisitorModel extends BaseModel {
       .groupBy('status').timeout(this.timeout);
     }
 
+    countStatusFromandTo(props){
+      return  this.knexInstance.select('status')
+      .count('status as count')
+      .whereBetween('day',[props.fromday,props.today])
+      .andWhereBetween('month',[props.frommonth,props.tomonth])
+      .andWhereBetween('year',[props.fromyear,props.toyear])
+      .groupBy('status').timeout(this.timeout);
+    }
+
     countPurpose(props){
      return this.knexInstance.select('purpose')
       .count('purpose as count')
@@ -26,10 +35,28 @@ class VisitorModel extends BaseModel {
       .groupBy('purpose').timeout(this.timeout);
     }
 
+    countPurposeFromandTo(props){
+      return this.knexInstance.select('purpose')
+      .count('purpose as count')
+      .whereBetween('day',[props.fromday,props.today])
+      .andWhereBetween('month',[props.frommonth,props.tomonth])
+      .andWhereBetween('year',[props.fromyear,props.toyear])
+      .groupBy('purpose').timeout(this.timeout);
+    }
+
     countFloor(props){
      return this.knexInstance.select('floorofinterest','status')
       .count('status as count')
       .where(props)
+      .groupBy('floorofinterest','status').timeout(this.timeout);
+    }
+
+    countFloorFromandTo(props){
+      return this.knexInstance.select('floorofinterest','status')
+      .count('status as count')
+      .whereBetween('day',[props.frommonth,props.today])
+      .andWhereBetween('month',[props.frommonth,props.tomonth])
+      .andWhereBetween('year',[props.fromyear,props.toyear])
       .groupBy('floorofinterest','status').timeout(this.timeout);
     }
 
@@ -43,7 +70,7 @@ class VisitorModel extends BaseModel {
       return this.knexInstance
           .select('*')
           .from(this.tableName)
-          .where('fullname', 'like', `%${substring}%`) // Partial match on fullname
+          .where('fullname', 'like', `%${substring}%`) 
           .orderBy('id', 'desc')
           .timeout(this.timeout);
   }
