@@ -11,6 +11,7 @@ router.post('/users/add',async (req,res) => {
 router.post('/users/login',async (req,res) => {
     const controller = new UserController(req,res);
     await controller.login();
+    //add anytime a user is logged in regenerate the userid and update 
 });
 
 router.get('/users/:userid',async (req,res) => {

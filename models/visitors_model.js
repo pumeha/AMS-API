@@ -62,11 +62,16 @@ class VisitorModel extends BaseModel {
     }
 
     getVisitorsFromAndTo(props){ 
+     const visitorsColumns = ['fullname','address','visitors.phonenumber','purpose',
+      'whotosee','floorofinterest','tagno','day','month','year','time_in',
+      'time_out','status'
+     ];
+     
      return this.knexInstance 
      .join('users','visitors.userid','=','users.userid') 
      .join('survey','visitors.visitorid','=','survey.visitorid') 
      .select(knexDb.raw("CONCAT(users.firstname,' ', users.lastname,'-',users.phonenumber) AS createdby"),
-      'visitors.*','satisfied','how_satisfied','reasons').whereBetween('day',[props.fromday,props.today])
+      ...visitorsColumns,'satisfied','how_satisfied','reasons').whereBetween('day',[props.fromday,props.today])
       .andWhereBetween('month',[props.frommonth,props.tomonth])
       .andWhereBetween('year',[props.fromyear,props.toyear]).timeout(this.timeout);
     }
