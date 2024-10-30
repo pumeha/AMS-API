@@ -51,20 +51,20 @@ class UserController extends BaseController {
           return this.errorResponse(500, 'Internal Server Error');      
         });
     }
-
+    //admin
     async getUsers(){
         const userid = this.req.params;
         const validateUser = await new VisitorController().validateReceptionist(userid['userid']);  
           
         if (validateUser !== 2) {
-            return this.errorResponse(404,'Access Denied');
+            return this.errorResponse(404,'Access is denied');
         }
         new User().findAll().then(data=>{
         return this.successResponse('Success',data,200);
         }).catch(err=>{
             console.log(err);
             return this.errorResponse(500,'Internal Server Error');
-        })
+        });
     }
                 
     validateLoginInputs(phonenumber,passcode) {

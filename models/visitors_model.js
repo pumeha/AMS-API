@@ -1,3 +1,4 @@
+const { knexDb } = require("../config/database");
 const BaseModel = require("./base_model");
 
 class VisitorModel extends BaseModel {
@@ -61,7 +62,11 @@ class VisitorModel extends BaseModel {
     }
 
     getVisitorsFromAndTo(props){ 
-     return this.knexInstance.select('*').whereBetween('day',[props.fromday,props.today])
+     return this.knexInstance 
+     .join('users','visitors.userid','=','users.userid') 
+     .join('survey','visitors.visitorid','=','survey.visitorid') 
+     .select(knexDb.raw("CONCAT(users.firstname,' ', users.lastname,'-',users.phonenumber) AS createdby"),
+      'visitors.*','satisfied','how_satisfied','reasons').whereBetween('day',[props.fromday,props.today])
       .andWhereBetween('month',[props.frommonth,props.tomonth])
       .andWhereBetween('year',[props.fromyear,props.toyear]).timeout(this.timeout);
     }

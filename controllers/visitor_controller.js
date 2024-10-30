@@ -8,7 +8,7 @@ class VisitorController extends BaseController {
     constructor(req,res) {
         super(req,res);
     }
-
+    //receptionist
     async registerVisitor(){
         const props = this.req.body;
         
@@ -21,7 +21,8 @@ class VisitorController extends BaseController {
 
         const receptionist = await this.validateReceptionist(props.userid);
         
-        if(receptionist == 0) return this.errorResponse(404,'Receptionist does not exist');
+        if(receptionist == 0 ||
+             receptionist ==2) return this.errorResponse(404,'Access is denied');
             
         const visitorid = this.generateUserId();
         props.visitorid = visitorid;
@@ -41,7 +42,7 @@ class VisitorController extends BaseController {
 
     
     }
-
+    //admin 
     async getVisitors(){
 
     const props = this.req.body;
@@ -54,7 +55,7 @@ class VisitorController extends BaseController {
 
      const validateUser = await this.validateReceptionist(props.userid);
     if (validateUser == 0 || validateUser == 1) {
-        return this.errorResponse(404,'Access denied');
+        return this.errorResponse(404,'Access is denied');
     }
 
       return new Visitor().getVisitorsFromAndTo(props).then(data=>{
@@ -67,7 +68,7 @@ class VisitorController extends BaseController {
         return this.errorResponse(500,'Internal Server Error');
      });
     }
-
+    //admin
     async searchVisitor(){
     const props = this.req.params;
     //status if = 0, search with phone, = 1 with name 
@@ -79,7 +80,7 @@ class VisitorController extends BaseController {
 
     const validateUser = await this.validateReceptionist(props.userid);
     if (validateUser == 0 || validateUser == 1) {
-        return this.errorResponse(404,'Access denied');
+        return this.errorResponse(404,'Access is denied');
     }
    
         switch (props.status) {
@@ -109,12 +110,13 @@ class VisitorController extends BaseController {
         }
     
     }
-
+    //receptiontist
     async getTodayVisitors(){
      const {userid} = this.req.params;
      const status = await this.validateReceptionist(userid);
 
-     if(status == 0 ) return this.errorResponse(404,'receptionist does not exist');
+     if(status == 0 ||
+        status == 2) return this.errorResponse(404,'Access is denied');
    
      return new Visitor()
      .find({day: this.todayDay(),month: this.todayMonth(),year:this.todayYear()})
@@ -128,13 +130,14 @@ class VisitorController extends BaseController {
     
         
     }
-
+    //receptiontist
     async getTodayStatistics(){
         const props = {};
         const {userid} = this.req.body;
         const result = await this.validateReceptionist(userid);
 
-        if(result == 0) return this.errorResponse(404,'receptionist does not exist');
+        if(result == 0 || result == 2) 
+            return this.errorResponse(404,'Access is denied');
         props.year = this.todayYear();
         props.month = this.todayMonth();
         props.day = this.todayDay();
@@ -142,16 +145,18 @@ class VisitorController extends BaseController {
         Promise.all([
             new Visitor().countStatus(props),
             new Visitor().countPurpose(props),
-            new Visitor().countFloor(props)
-        ]).then(([statusResults,purposeResults,floorResults])=>{
-            return this.successResponse('success',{statusResults,purposeResults,floorResults},200);
+            new Visitor().countFloor(props),
+            new Survey().getTodaySatisfiedVisitorsSurvey(props)
+        ]).then(([statusResults,purposeResults,floorResults,satisfiedResults])=>{
+            return this.successResponse('success',
+                {statusResults,purposeResults,floorResults,satisfiedResults},200);
         }).catch((err)=>{
             console.log(err);
             return this.errorResponse(500,'Internal Server Error');
         });
         
     }
-
+    //admin
     async getRangeStatistics(){
         const props = this.req.body;
 
@@ -165,16 +170,17 @@ class VisitorController extends BaseController {
         const validateUser = await this.validateReceptionist(props.userid);
 
         if (validateUser == 0 || validateUser == 1) {
-            return this.errorResponse(404,'Access Denied');
+            return this.errorResponse(404,'Access is denied');
         }
 
         Promise.all([
             new Visitor().countFloorFromandTo(props),
             new Visitor().countPurposeFromandTo(props),
-            new Visitor().countStatusFromandTo(props)
-        ]).then(([purposeResults,floorResults,statusResults])=>{
-            return this.successResponse('sucess',{
-                purposeResults,floorResults,statusResults
+            new Visitor().countStatusFromandTo(props),
+            new Survey().getSatisfiedVisitorsSurveyFromandTo(props)
+        ]).then(([purposeResults,floorResults,statusResults,satisfiedResults])=>{
+            return this.successResponse('success',{
+                purposeResults,floorResults,statusResults,satisfiedResults
             },200);
         }).catch(err=>{
             console.log(err);
@@ -182,7 +188,7 @@ class VisitorController extends BaseController {
         });
 
     }
-
+    //receptiontist
     async signOutNonOfficialVisitor(){
         const props = this.req.body;
         const inputs = this.validateNonSignOut(props.visitorid,props.userid);
@@ -191,7 +197,7 @@ class VisitorController extends BaseController {
         const time = this.currentTime();
         
         const result = await this.validateReceptionist(props.userid);
-        if(result == 0) return this.errorResponse(404,'receptionist does not exist');
+        if(result == 0 || result == 2) return this.errorResponse(404,'Access is denied');
 
         return new Visitor().update({visitorid:props.visitorid},
             {status:0,time_out:time}).then(data =>{
@@ -204,7 +210,7 @@ class VisitorController extends BaseController {
         });
 
     }
-
+    //both
     async validateReceptionist(userid){        
         if (typeof userid !== 'string' || !userid || userid.length != 28) {
             return 0;

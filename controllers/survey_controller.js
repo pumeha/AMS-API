@@ -24,7 +24,8 @@ class SurveyController extends BaseController {
         }
 
        const userExist = await new VisitorController().validateReceptionist(props.userid);
-       if(userExist == 0) return this.errorResponse(404,'Receptionist is not found');
+       if(userExist == 0 || userExist == 2) 
+        return this.errorResponse(404,'Access is denied');
         
        const visitorExist = await this.validateVisitor(props.visitorid);
        if(visitorExist == 0) return this.errorResponse(404, 'Visitor is not found or Has Signout');
