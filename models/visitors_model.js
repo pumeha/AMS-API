@@ -85,6 +85,21 @@ class VisitorModel extends BaseModel {
           .timeout(this.timeout);
   }
 
+  getTodaySatisfiedVisitorsSurvey(props){ 
+    const filteredVisitors = this.knexInstance
+     .select('visitorid')
+     .where(props);
+
+ return knexDb('survey')
+     .whereIn('visitorid', filteredVisitors)
+     .where('satisfied', 'yes')
+     .select('how_satisfied')
+     .groupBy('how_satisfied')
+     .count('how_satisfied as count')
+     .timeout(this.timeout);
+ 
+    }
+
     
 
 

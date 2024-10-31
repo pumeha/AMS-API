@@ -29,7 +29,7 @@ class BaseController {
     } 
 
     currentTime() {
-    let hours = this.currentDate.getHours();
+    let hours = this.currentDate.getHours() +1;
     const AmPm = hours >= 12 ? 'PM' : 'AM';
     //convert hours to 12-hour format
     hours = hours % 12 || 12;

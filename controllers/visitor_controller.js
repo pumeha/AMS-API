@@ -146,7 +146,7 @@ class VisitorController extends BaseController {
             new Visitor().countStatus(props),
             new Visitor().countPurpose(props),
             new Visitor().countFloor(props),
-            new Survey().getTodaySatisfiedVisitorsSurvey(props)
+            new Visitor().getTodaySatisfiedVisitorsSurvey(props)
         ]).then(([statusResults,purposeResults,floorResults,satisfiedResults])=>{
             return this.successResponse('success',
                 {statusResults,purposeResults,floorResults,satisfiedResults},200);
