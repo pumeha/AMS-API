@@ -9,7 +9,6 @@ exports.up = function(knex) {
     table.string('passcode',20).notNullable();
     table.string('role',20).notNullable();
     table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
   }
 )};
 

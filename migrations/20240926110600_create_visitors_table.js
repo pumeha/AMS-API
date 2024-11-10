@@ -13,20 +13,14 @@ const time = hours + ':'+ currentDate.getMinutes() + ' ' + AmPm;
         table.string('address').notNullable();
         table.string('phonenumber').notNullable();
         table.string('purpose').notNullable();
-        table.string('whotosee').notNullable();
-        table.string('floor1',1).defaultTo('0'); //0 = not seen, 1= present, 2 = left
-        table.string('floor2',1).defaultTo('0');
-        table.string('floor3',1).defaultTo('0');
-        table.string('floor4',1).defaultTo('0');
-        table.string('floor5',1).defaultTo('0');
+        table.string('whotosee').notNullable();  
         table.string('floorofinterest').notNullable();
         table.string('tagno').notNullable();
-        table.string('day',2).defaultTo(currentDate.getDate());
-        table.string('month',2).defaultTo(currentDate.getMonth() + 1);
-        table.string('year',4).defaultTo(currentDate.getFullYear());
+        table.date('date').notNullable();
         table.string('time_in').defaultTo(time);
         table.string('time_out').defaultTo(time);
         table.string('status',1).notNullable().defaultTo('1');//1 = present, 0 = absent
+        table.timestamp('created_at').defaultTo(knex.fn.now());
   })};
 
 

@@ -28,9 +28,7 @@ class VisitorController extends BaseController {
         props.visitorid = visitorid;
         props.time_in = this.currentTime();
         
-        props.year = this.todayYear();
-        props.month = this.todayMonth();
-        props.day = this.todayDay();
+        props.date = this.date();
 
         return new Visitor().create(props).then(data=>{
             if(!data) return this.errorResponse(404,'failed to register visitor');
@@ -47,9 +45,7 @@ class VisitorController extends BaseController {
 
     const props = this.req.body;
 
-     const date = this.validateDate(props.fromday,props.frommonth,props.fromyear,
-        props.today,props.tomonth,props.toyear
-     );   
+     const date = this.validateDate(props.from,props.to);   
 
      if(date.length > 0) return this.errorResponse(404,`invalid input(s) for ${date}`);
 
@@ -119,7 +115,7 @@ class VisitorController extends BaseController {
         status == 2) return this.errorResponse(404,'Access is denied');
    
      return new Visitor()
-     .find({day: this.todayDay(),month: this.todayMonth(),year:this.todayYear()})
+     .find({date: this.date()})
      .then(data=>{
         if(!data) return this.errorResponse(404,'an error occurred while fetching');
         return this.successResponse('success',data,200);
@@ -138,9 +134,7 @@ class VisitorController extends BaseController {
 
         if(result == 0 || result == 2) 
             return this.errorResponse(404,'Access is denied');
-        props.year = this.todayYear();
-        props.month = this.todayMonth();
-        props.day = this.todayDay();
+        props.date = this.date();
 
         Promise.all([
             new Visitor().countStatus(props),
@@ -160,9 +154,7 @@ class VisitorController extends BaseController {
     async getRangeStatistics(){
         const props = this.req.body;
 
-        const date = this.validateDate(props.fromday,props.frommonth,props.fromyear,
-           props.today,props.tomonth,props.toyear
-        );   
+        const date = this.validateDate(props.from,props.to );   
 
         if (date.length >0) {
             return this.errorResponse(404,`invalid input(s) for ${date}`);
@@ -178,7 +170,7 @@ class VisitorController extends BaseController {
             new Visitor().countPurposeFromandTo(props),
             new Visitor().countStatusFromandTo(props),
             new Survey().getSatisfiedVisitorsSurveyFromandTo(props)
-        ]).then(([purposeResults,floorResults,statusResults,satisfiedResults])=>{
+        ]).then(([floorResults,purposeResults,statusResults,satisfiedResults])=>{
             return this.successResponse('success',{
                 purposeResults,floorResults,statusResults,satisfiedResults
             },200);
@@ -275,26 +267,14 @@ class VisitorController extends BaseController {
             return errrors;
     }
 
-    validateDate(fromday,frommonth,fromyear,today,tomonth,toyear) {
+    validateDate(from,to) {
         const errrors = [];
     
-        if ( !Number.isInteger(fromday)) {
-            errrors.push('fromday');
+        if ( !this.validateDateFormat(from)) {
+            errrors.push('from');
         }
-        if ( !Number.isInteger(frommonth)) {
-            errrors.push('frommonth');
-        }
-        if (!Number.isInteger(fromyear)) {
-            errrors.push('fromyear');
-        }
-        if ( !Number.isInteger(today)) {
-            errrors.push('today');
-        }
-        if ( !Number.isInteger(tomonth)) {
-            errrors.push('tomonth');
-        }
-        if (!Number.isInteger(toyear)) {
-            errrors.push('toyear');
+        if ( !this.validateDateFormat(to)) {
+            errrors.push('to');
         }
     
         return errrors;
@@ -310,6 +290,8 @@ class VisitorController extends BaseController {
 
         return error;
     }
+   
+   
 }
 
 module.exports = VisitorController;

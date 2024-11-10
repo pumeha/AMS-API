@@ -1,4 +1,6 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Adjust path as needed
+
 module.exports = {
 
   development: {
@@ -10,7 +12,8 @@ module.exports = {
     },
     pool: {min:0,max:7},
     migrations:{
-      tableName: 'knex_migrations'
+      tableName: 'knex_migrations',
+      directory: '../migrations'
     }
   },
 

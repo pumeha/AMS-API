@@ -13,9 +13,7 @@ class SurveyModel extends BaseModel {
         .join('visitors','survey.visitorid','=','visitors.visitorid')
         .where('satisfied','yes')
         .select('how_satisfied')
-        .whereBetween('day',[props.fromday,props.today])
-         .andWhereBetween('month',[props.frommonth,props.tomonth])
-         .andWhereBetween('year',[props.fromyear,props.toyear])
+        .whereBetween('date',[props.from,props.to])
          .groupBy('how_satisfied')
          .count('how_satisfied as count')
          .timeout(this.timeout);

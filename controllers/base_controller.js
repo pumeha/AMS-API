@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 class BaseController {
     currentDate = new Date();
     constructor(req,res) {
@@ -45,6 +46,15 @@ class BaseController {
     }
     todayDay(){
         return this.currentDate.getDate();
+    }
+
+    date(){
+        return this.todayYear() + '-' + this.todayMonth() + '-' + this.todayDay();
+    }
+
+
+    validateDateFormat(dateString) {
+    return dateRegex.test(dateString);
     }
 }
 

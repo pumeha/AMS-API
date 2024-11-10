@@ -6,10 +6,9 @@ class VisitorModel extends BaseModel {
       super('visitors',[
         'id','userid','visitorid','fullname',
         'address','phonenumber','purpose',
-        'whotosee','floor1','floor2','floor3',
-        'floor4','floor5','floorofinterest',
-        'tagno','day','month','year','time_in',
-        'time_out','status'
+        'whotosee','floorofinterest',
+        'tagno','date','time_in',
+        'time_out','status','created_at'
       ]);  
     }
 
@@ -23,9 +22,7 @@ class VisitorModel extends BaseModel {
     countStatusFromandTo(props){
       return  this.knexInstance.select('status')
       .count('status as count')
-      .whereBetween('day',[props.fromday,props.today])
-      .andWhereBetween('month',[props.frommonth,props.tomonth])
-      .andWhereBetween('year',[props.fromyear,props.toyear])
+      .whereBetween('date',[props.from,props.to])
       .groupBy('status').timeout(this.timeout);
     }
 
@@ -39,9 +36,7 @@ class VisitorModel extends BaseModel {
     countPurposeFromandTo(props){
       return this.knexInstance.select('purpose')
       .count('purpose as count')
-      .whereBetween('day',[props.fromday,props.today])
-      .andWhereBetween('month',[props.frommonth,props.tomonth])
-      .andWhereBetween('year',[props.fromyear,props.toyear])
+      .whereBetween('date',[props.from,props.to])
       .groupBy('purpose').timeout(this.timeout);
     }
 
@@ -55,15 +50,13 @@ class VisitorModel extends BaseModel {
     countFloorFromandTo(props){
       return this.knexInstance.select('floorofinterest','status')
       .count('status as count')
-      .whereBetween('day',[props.frommonth,props.today])
-      .andWhereBetween('month',[props.frommonth,props.tomonth])
-      .andWhereBetween('year',[props.fromyear,props.toyear])
+      .whereBetween('date',[props.from,props.to])
       .groupBy('floorofinterest','status').timeout(this.timeout);
     }
 
     getVisitorsFromAndTo(props){ 
      const visitorsColumns = ['fullname','address','visitors.phonenumber','purpose',
-      'whotosee','floorofinterest','tagno','day','month','year','time_in',
+      'whotosee','floorofinterest','tagno','date','time_in',
       'time_out','status'
      ];
      
@@ -71,9 +64,9 @@ class VisitorModel extends BaseModel {
      .join('users','visitors.userid','=','users.userid') 
      .join('survey','visitors.visitorid','=','survey.visitorid') 
      .select(knexDb.raw("CONCAT(users.firstname,' ', users.lastname,'-',users.phonenumber) AS createdby"),
-      ...visitorsColumns,'satisfied','how_satisfied','reasons').whereBetween('day',[props.fromday,props.today])
-      .andWhereBetween('month',[props.frommonth,props.tomonth])
-      .andWhereBetween('year',[props.fromyear,props.toyear]).timeout(this.timeout);
+      ...visitorsColumns,'satisfied','how_satisfied','reasons')
+      .whereBetween('date',[props.from,props.to])
+      .timeout(this.timeout);
     }
 
     findByFullnameContains(substring) {      
